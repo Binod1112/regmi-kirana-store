@@ -1,0 +1,1 @@
+export { defaultMapUrl } from "../app/components/store-settings";
