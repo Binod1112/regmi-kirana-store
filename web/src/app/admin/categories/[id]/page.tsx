@@ -5,5 +5,5 @@ export function generateStaticParams() {
 }
 
 export default function EditCategoryPage({ params }: { params: Promise<{ id: string }> }) {
-  return <EditCategoryForm params={params} />;
+  return <EditCategoryForm categoryIdFromParams={params} />;
 }

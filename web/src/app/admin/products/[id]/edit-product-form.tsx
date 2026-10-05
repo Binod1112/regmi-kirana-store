@@ -6,12 +6,12 @@ import { sitePath } from "../../../../lib/site-path";
 import "../../../admin/admin.css";
 import "../../../admin/product-photo.css";
 
-export default function EditProductForm({ params }: { params: Promise<{ id: string }> }) {
+export default function EditProductForm({ productId, productIdFromParams }: { productId?: string; productIdFromParams?: Promise<{ id: string }> }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({ name: "", category: "", unit: "", price: "", sortOrder: "", imageUrl: "", stockStatus: "in-stock" as StockStatus });
   const [busy, setBusy] = useState(false);
-  useEffect(() => { params.then(({ id }) => Promise.all([getProducts(), getCategories()]).then(([products, nextCategories]) => { const current = products.find((item) => item.id === Number(id)); if (current) { setProduct(current); setForm({ name: current.name, category: current.category, unit: current.unit, price: String(current.price), sortOrder: String(current.sortOrder ?? 1), imageUrl: current.imageUrl || "", stockStatus: current.stockStatus ?? (current.available ? "in-stock" : "out-of-stock") }); } setCategories(nextCategories); })); }, [params]);
+  useEffect(() => { (productIdFromParams ? productIdFromParams.then(({ id }) => id) : Promise.resolve(productId || "")).then((resolvedId) => Promise.all([getProducts(), getCategories()]).then(([products, nextCategories]) => { const current = products.find((item) => item.id === Number(resolvedId)); if (current) { setProduct(current); setForm({ name: current.name, category: current.category, unit: current.unit, price: String(current.price), sortOrder: String(current.sortOrder ?? 1), imageUrl: current.imageUrl || "", stockStatus: current.stockStatus ?? (current.available ? "in-stock" : "out-of-stock") }); } setCategories(nextCategories); })); }, [productId, productIdFromParams]);
   async function selectImage(event: ChangeEvent<HTMLInputElement>) { const file = event.target.files?.[0]; if (!file) return; setBusy(true); try { const imageUrl = await uploadProductImage(file); setForm((current) => ({ ...current, imageUrl })); } finally { setBusy(false); } }
   async function submit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); if (!product) return; await saveProduct({ id: product.id, name: form.name.trim(), category: form.category, unit: form.unit.trim(), price: Number(form.price), sortOrder: Number(form.sortOrder) || 1, available: form.stockStatus !== "out-of-stock", stockStatus: form.stockStatus, imageUrl: form.imageUrl }); window.location.href = sitePath("/admin/products"); }
   if (!product) return <main className="admin-page"><p className="admin-empty">Product not found.</p></main>;

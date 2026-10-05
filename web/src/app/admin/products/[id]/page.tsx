@@ -5,5 +5,5 @@ export function generateStaticParams() {
 }
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
-  return <EditProductForm params={params} />;
+  return <EditProductForm productIdFromParams={params} />;
 }
